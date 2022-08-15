@@ -3,27 +3,33 @@
  * https://reactnavigation.org/docs/getting-started
  *
  */
-import { FontAwesome } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
-import { ColorSchemeName, Pressable } from 'react-native';
+import { ColorSchemeName, View, StyleSheet } from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import TabOneScreen from '../screens/TabOneScreen';
-import TabTwoScreen from '../screens/TabTwoScreen';
-import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
+import CreateScreen from '../screens/CreateScreen';
+import JoinScreen from '../screens/JoinScreen';
+import { RootStackParamList, RootTabParamList } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
+import { navigationRef } from "../redux/navigation-service";
+import PokerScreen from "../screens/PokerScreen";
+
+
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
-      theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+      ref={navigationRef}
+    >
       <RootNavigator />
     </NavigationContainer>
   );
@@ -34,15 +40,20 @@ export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeNa
  * https://reactnavigation.org/docs/modal
  */
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
 function RootNavigator() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerStyle: { } }}>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
-      <Stack.Group screenOptions={{ presentation: 'modal' }}>
+      <Stack.Group screenOptions={{
+          presentation: 'modal',
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: Colors.primaryPurple },
+          headerTintColor: "white",
+      }} >
         <Stack.Screen name="Modal" component={ModalScreen} />
       </Stack.Group>
+      <Stack.Screen name="Poker" component={PokerScreen} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
@@ -57,51 +68,64 @@ function BottomTabNavigator() {
   const colorScheme = useColorScheme();
 
   return (
-    <BottomTab.Navigator
-      initialRouteName="TabOne"
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-      }}>
-      <BottomTab.Screen
-        name="TabOne"
-        component={TabOneScreen}
-        options={({ navigation }: RootTabScreenProps<'TabOne'>) => ({
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate('Modal')}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}>
-              <FontAwesome
-                name="info-circle"
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
+      <View style={styles.container}>
+          <BottomTab.Navigator
+              initialRouteName="Create"
+              screenOptions={{
+                  tabBarActiveTintColor: "white",
+                  tabBarInactiveTintColor: "#803b47",
+                  tabBarStyle: {
+                      backgroundColor: "#ec6d84",
+                      borderTopWidth: 0,
+                      shadowColor: "transparent"
+                  },
+              }}
+          >
+              <BottomTab.Screen
+                  name="Create"
+                  component={CreateScreen}
+                  options={{
+                      headerShown: false,
+                      title: "Create",
+                      tabBarIcon: ({ color }) => <TabBarIcon name="create" color={color} />,
+                  }}
               />
-            </Pressable>
-          ),
-        })}
-      />
-      <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoScreen}
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </BottomTab.Navigator>
+              <BottomTab.Screen
+                  name="Join"
+                  component={JoinScreen}
+                  options={{
+                      headerShown: false,
+                      title: "Join",
+                      tabBarIcon: ({ color }) => <TabBarIcon name="people" color={color} />,
+                  }}
+              />
+          </BottomTab.Navigator>
+      </View>
+
   );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "red"
+    },
+    header: {
+        height: 80,
+        width: 100,
+    },
+    headerText: {
+        color: "red",
+        fontSize: 20,
+    }
+});
 
 /**
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
  */
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
+  name: React.ComponentProps<typeof MaterialIcons>['name'];
   color: string;
 }) {
-  return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
+  return <MaterialIcons size={30} style={{ marginBottom: -3 }} {...props} />;
 }

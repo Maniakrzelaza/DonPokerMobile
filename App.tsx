@@ -5,18 +5,32 @@ import useCachedResources from './hooks/useCachedResources';
 import useColorScheme from './hooks/useColorScheme';
 import Navigation from './navigation';
 
-export default function App() {
-  const isLoadingComplete = useCachedResources();
-  const colorScheme = useColorScheme();
+import { Provider } from 'react-redux';
+import { store, persistor } from './redux/store';
+import {  useEffect } from "react";
+import { init } from "./redux/firebase";
+import { PersistGate } from 'redux-persist/integration/react';
 
-  if (!isLoadingComplete) {
-    return null;
-  } else {
-    return (
-      <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar />
-      </SafeAreaProvider>
-    );
-  }
+export default function App() {
+    const isLoadingComplete = useCachedResources();
+    const colorScheme = useColorScheme();
+
+    useEffect(() => {
+        init();
+    }, [])
+
+    if (!isLoadingComplete) {
+        return null;
+    } else {
+        return (
+            <SafeAreaProvider>
+                <Provider store={store}>
+                    <PersistGate loading={null} persistor={persistor}>
+                        <Navigation colorScheme={colorScheme} />
+                        <StatusBar style="light"/>
+                    </PersistGate>
+                </Provider>
+            </SafeAreaProvider>
+        );
+    }
 }

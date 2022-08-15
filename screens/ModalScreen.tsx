@@ -1,35 +1,53 @@
-import { StatusBar } from 'expo-status-bar';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet, View, ScrollView } from 'react-native';
+import WithBackgroundContainer from "../hocs/WithBackgroundContainer";
+import PokerCard, { PokerCardMode } from "../components/poker-screen/PokerCard";
+import { CardValue, CardValues } from "../constants/model/poker-model";
+import { useCallback } from "react";
+import Grid from "../components/grid/Grid";
+import Colors from "../constants/Colors";
 
-import EditScreenInfo from '../components/EditScreenInfo';
-import { Text, View } from '../components/Themed';
+const ModalScreen = () => {
+    const renderCard = useCallback((card: CardValue) => (
+        <PokerCard
+            card={card}
+            mode={PokerCardMode.InModal}
+            style={styles.card}
+        />
+    ), []);
 
-export default function ModalScreen() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Modal</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="/screens/ModalScreen.tsx" />
-
-      {/* Use a light status bar on iOS to account for the black space above the modal */}
-      <StatusBar style={Platform.OS === 'ios' ? 'light' : 'auto'} />
-    </View>
+      <View style={styles.container}>
+          <ScrollView style={styles.scroll}>
+              <Grid
+                  items={CardValues}
+                  renderItem={renderCard}
+                  columns={3}
+                  padding={5}
+              />
+          </ScrollView>
+      </View>
   );
 }
+
+export default WithBackgroundContainer(ModalScreen);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    width: "100%",
+    borderRadius: 10,
+    paddingLeft: 10,
+    paddingRight: 5,
+    paddingVertical: 5,
+    backgroundColor: Colors.primaryDark,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  card: {
+      width: "100%",
   },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
+  scroll: {
+      maxWidth: "100%",
+      paddingRight: 5,
   },
 });
